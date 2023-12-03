@@ -1,54 +1,49 @@
 package main
 
 import (
-	"fmt"
 	"bufio"
+	"fmt"
 	"os"
 	"regexp"
 	"strconv"
 )
 
 func main() {
-	f, _ := os.Open("input")
-	defer f.Close()
-
-	re, _ := regexp.Compile("([0-9]+) (red|green|blue)")
-
-	scanner := bufio.NewScanner(f)
+	partOne := 0
+	partTwo := 0
+	
+	file, _ := os.Open("input")
+	defer file.Close()
+	scanner := bufio.NewScanner(file)
+	
+	regex, _ := regexp.Compile("([0-9]+) (red|green|blue)")	
+	
 	index := 0
-	sum := 0
-
 	for scanner.Scan() {
-		text := scanner.Text()
-		match := re.FindAllStringSubmatch(text, -1)
-		isPossible := true
+		line := scanner.Text()
+		match := regex.FindAllStringSubmatch(line, -1)
 		
-		for _, v := range match {
-			n, _ := strconv.Atoi(v[1])
+		isPossible := true
+		bag := NewMinBag()
 
-			switch v[2] {
-				case "red":
-					if n > 12 {
-						isPossible = false
-					}
-				case "green":
-					if n > 13 {
-						isPossible = false
-					}
-				case "blue":
-					if n > 14 {
-						isPossible = false
-					}
-			}
+		for _, value := range match {
+			color := value[2]
+			number, _ := strconv.Atoi(value[1])
+
+			bag.SetMinBag(color, number)
+			IdentifyGameIsPossible(&isPossible, color, number)
 		}
 
 		index++
+
+		partTwo += bag.Power()
+
 		if !isPossible {
 			continue
 		}
-
-		sum += index
+		partOne += index
 	}
 
-	fmt.Println(sum)
+	fmt.Printf("Part One: %d\n", partOne)
+	fmt.Printf("Part Two: %d\n", partTwo)
 }
